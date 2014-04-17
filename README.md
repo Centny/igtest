@@ -127,6 +127,12 @@ INC /tmp/ab.s
 ####SUB path k1=v1 k2=v2
 execute subscript by argument k1 and k2
 
+* path:file path or http url
+* k1=v1:transfter key value to subprocess.
+* `-cooki` transfter cookie to subprocess.
+* `-CTX` transfter context to subprocess(cookie and value).
+* `-ig` ignore error for subprocess.
+
 ```
 SUB /tmp/ab.s va=123 vb=abc
 ```

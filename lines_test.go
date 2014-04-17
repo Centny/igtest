@@ -1,6 +1,9 @@
 package igtest
 
 import (
+	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 )
 
@@ -99,4 +102,25 @@ func TestSub(t *testing.T) {
 	ctx := NewCtx(nil)
 	ctx.SET("a", 111)
 	l.N(ctx, false)
+}
+
+func TestASubNet(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("P $bb\n"))
+		fmt.Println("lllllll")
+	}))
+	c := &Compiler{}
+	l := Line{}
+	l.C = c
+	l.T = "SUB"
+	l.Args = []string{ts.URL, "bb=111111"}
+	_, err := l.Sub(NewCtx(nil), true)
+	if err != nil {
+		t.Error(err.Error())
+	}
+	l.Args = []string{"http://kkk", "bb=111111"}
+	_, err = l.Sub(NewCtx(nil), true)
+	if err == nil {
+		t.Error("not error")
+	}
 }

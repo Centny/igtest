@@ -1,9 +1,13 @@
 package igtest
 
 import (
+	"fmt"
+	"github.com/Centny/Cny4go/util"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type Line struct {
@@ -164,6 +168,9 @@ func (l *Line) Sub(ctx *Ctx, left bool) (interface{}, error) {
 	var ignore_err bool = false
 	nctx := NewCtx(ctx)
 	for _, arg := range l.Args[0:] {
+		if arg == "-CTX" { //setting the same context to sub
+			nctx = ctx
+		}
 		if arg == "-cookie" { //setting cookie to sub
 			nctx.H = ctx.H
 			continue
@@ -180,7 +187,15 @@ func (l *Line) Sub(ctx *Ctx, left bool) (interface{}, error) {
 	}
 	c := Compiler{}
 	tpath := ctx.Compile(l.Args[0])
-	if !filepath.IsAbs(tpath) {
+	if reg_http.MatchString(tpath) {
+		spath := fmt.Sprintf("/tmp/%v.ig", util.Timestamp(time.Now()))
+		defer os.RemoveAll(spath)
+		err := util.DLoad(spath, tpath)
+		if err != nil {
+			return nil, err
+		}
+		tpath = spath //set the tmp script to subscript path
+	} else if !filepath.IsAbs(tpath) {
 		tpath = filepath.Join(l.C.Cwd, tpath)
 	}
 	err := c.Load(tpath)

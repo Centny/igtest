@@ -38,6 +38,9 @@ $(/js/a)
 
 SUB sub.ig kk=111111 aa=444444 -cookie -ig
 SUB sub.ig kk=111111 aa=444444
+$aa=555555
+$kk=666666
+SUB sub.ig -CTX
 
 BC $a*$b
 SET aa 123
