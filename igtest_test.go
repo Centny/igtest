@@ -17,3 +17,13 @@ func TestExec(t *testing.T) {
 
 	ExecCtx("kkk", NewCtx(nil))
 }
+
+func TestRun(t *testing.T) {
+	Run([]string{"-l", "-m", "YOE", "test/sub.ig"})
+	Run([]string{"-l", "-m", "EYOE", "test/sub.ig"})
+	Run([]string{"-l", "-m", "NONE", "test/sub.ig"})
+	Run([]string{"-l", "-m", "YOE"})
+	Run([]string{"-l", "-m", "NN", "test/sub.ig"})
+	Run([]string{"test/subb.ig"})
+	Run([]string{"test/err.ig"})
+}

@@ -23,7 +23,8 @@ func (c *Compiler) addl(line string) {
 }
 
 func (c *Compiler) Load(spath string) error {
-	c.Cwd = filepath.Dir(spath)
+	cwd, _ := os.Getwd()
+	c.Cwd = filepath.Join(cwd, filepath.Dir(spath))
 	return c.load(spath)
 }
 func (c *Compiler) load(spath string) error {

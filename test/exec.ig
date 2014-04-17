@@ -54,13 +54,13 @@ $x1=123456
 $x2=123654
 EX /bin/echo $x1 $x2 #data=ex
 P $x1 $x2 $ex
-$p='/tmp/kk kk.log'
-EX cat $p #data=ex
-P $ex
-EX pwd #data=pwd
-// P $pwd
-$fp=@($pwd+/+test/sub.ig)
-// P $fp
+// $p='/tmp/kk kk.log'
+// EX cat $p #data=ex
+// P $ex
+// EX pwd #data=pwd
+P $CWD
+$fp=@($CWD+/+sub.ig)
+P file path $fp
 SUB $fp kk=$fp aa=testing
 $res=@[EX /bin/echo 1]
 Y $res
