@@ -51,4 +51,8 @@ EX /bin/echo abc #data=/ex/eh
 
 P $CWD //get the current script file location
 
+D filepath //delete file
+R filepath #abc //read file to abc
+W filepath $abc //write abc value to file
+
 ```

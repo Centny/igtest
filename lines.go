@@ -73,6 +73,21 @@ func (l *Line) exec(ctx *Ctx, left bool) (interface{}, error) {
 	case "P":
 		ctx.P(l.Args...)
 		return true, nil
+	case "R":
+		if len(l.Args) < 1 {
+			return nil, Err("Usage:R filepath ,but:%v", l.L)
+		}
+		return ctx.R(l.Args...)
+	case "W":
+		if len(l.Args) < 2 {
+			return nil, Err("Usage:W filepath $val ,but:%v", l.L)
+		}
+		return true, ctx.W(l.Args...)
+	case "D":
+		if len(l.Args) < 1 {
+			return nil, Err("Usage:D filepath ,but:%v", l.L)
+		}
+		return true, ctx.D(l.Args...)
 	case "SUB":
 		return l.Sub(ctx, left)
 	case "FOR":

@@ -121,3 +121,48 @@ func TestUrlEncode(t *testing.T) {
 	urls.Add("kk", "1111")
 	fmt.Println(urls.Encode())
 }
+
+func TestAwr(t *testing.T) {
+	ctx := NewCtx(nil)
+	v, err := ctx.R("test/t.json")
+	if err != nil {
+		t.Error(err.Error())
+		return
+	}
+	v, err = ctx.R("test/inc.ig")
+	if err != nil {
+		t.Error(err.Error())
+		return
+	}
+	fmt.Println(v, err)
+	v, err = ctx.R("test/t22.json")
+	if err == nil {
+		t.Error("not error")
+		return
+	}
+
+	os.Mkdir("/tmp/iiikk", 0644)
+	defer os.Remove("/tmp/iiikk")
+	v, err = ctx.R("/tmp/iiikk")
+	if err == nil {
+		t.Error("not error")
+		return
+	}
+	ctx.Kvs.SetValP("/ab", util.Map{
+		"abc": 1111,
+		"kkk": 2222,
+	})
+	ctx.Kvs.SetValP("/abc", "kkkk")
+	ctx.W("/tmp/aaa1", "sss")
+	ctx.W("/tmp/aaa2", "$ab")
+	ctx.W("/tmp/aaa3", "$(/ab)")
+	ctx.W("/tmp/aaa3", "$(/abc/kk)")
+	ctx.W("/tmp/iiikk", "$(/ab)")
+	ctx.W("/tmp/iiikk")
+	ctx.W()
+	ctx.R()
+	ctx.D()
+	os.Remove("/tmp/aaa1")
+	os.Remove("/tmp/aaa2")
+	os.Remove("/tmp/aaa3")
+}

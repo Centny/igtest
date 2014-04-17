@@ -64,3 +64,12 @@ P file path $fp
 SUB $fp kk=$fp aa=testing
 $res=@[EX /bin/echo 1]
 Y $res
+
+W /tmp/igtest testing
+R /tmp/igtest #data=igt
+Y $igt
+W /tmp/igtest2 {"abb":111}
+R /tmp/igtest2 #data=igt2
+Y $(/igt2/abb)
+D /tmp/igtest
+D /tmp/igtest2

@@ -3,6 +3,7 @@ package igtest
 import (
 	"bytes"
 	"code.google.com/p/go.net/publicsuffix"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/Centny/Cny4go/log"
@@ -10,6 +11,7 @@ import (
 	"io/ioutil"
 	"net/http/cookiejar"
 	"net/url"
+	"os"
 	"os/exec"
 	"regexp"
 	"strconv"
@@ -218,6 +220,81 @@ func (c *Ctx) EX(args ...string) (string, error) {
 	return data, err
 }
 
+func (c *Ctx) W(args ...string) error {
+	if len(args) < 1 {
+		return Err("write file error:%v", "file path not set")
+	}
+	if len(args) < 2 {
+		return Err("write file error:%v", "content not set")
+	}
+	fpath := c.Compile(args[0])
+	f, err := os.OpenFile(args[0], os.O_CREATE|os.O_RDWR, 0644)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	var val interface{} = nil
+	if e_reg_v.MatchString(args[1]) {
+		val, err = c.Kvs.ValP(strings.Trim(args[1], " \t$()"))
+		if err != nil {
+			return err
+		}
+	} else {
+		val = args[1]
+	}
+	var l int = 0
+	if mv := util.MapVal(val); mv != nil {
+		jbys, _ := json.Marshal(mv)
+		l, err = f.Write(jbys)
+	} else {
+		l, err = f.WriteString(util.StrVal(val))
+	}
+	if err == nil {
+		c.log("wite %d data to file:%v", l, fpath)
+	}
+	return err
+}
+
+func (c *Ctx) R(args ...string) (interface{}, error) {
+	if len(args) < 1 {
+		return nil, Err("write file error:%v", "file path not set")
+	}
+
+	fpath := c.Compile(args[0])
+	f, err := os.Open(fpath)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	bys, err := ioutil.ReadAll(f)
+	if err != nil {
+		return nil, err
+	}
+	var val interface{} = nil
+	val, err = util.Json2Map(string(bys))
+	if err != nil {
+		val = string(bys)
+	}
+	if len(args) > 1 && strings.HasPrefix(args[1], "#") {
+		kv := strings.SplitN(args[1], "=", 2)
+		if len(kv) == 2 && kv[0] == "#data" {
+			c.log("setting data to %v", kv[1])
+			c.SET(kv[1], val)
+		}
+	}
+	c.log("read %d data from file:%v", len(bys), fpath)
+	return val, nil
+}
+
+func (c *Ctx) D(args ...string) error {
+	if len(args) < 1 {
+		return Err("delete file error:%v", "file path not set")
+	}
+	fpath := c.Compile(args[0])
+	err := os.RemoveAll(fpath)
+	c.log("delete file:%v", fpath)
+	return err
+}
 func NewCtx(p *Ctx) *Ctx {
 	ctx := &Ctx{}
 	ctx.Kvs = util.Map{}

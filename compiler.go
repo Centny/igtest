@@ -244,8 +244,28 @@ func (c *Compiler) NewLine(line string, onexeced OnExecedFunc) (*Line, error) {
 		}
 		T = "N"
 		args = args[1:]
+	} else if c_reg_R.MatchString(line) {
+		args = empty.Split(line, -1)
+		if len(args) < 2 {
+			return nil, Err("R error:%v", "argument is empty")
+		}
+		T = "R"
+		args = args[1:]
+	} else if c_reg_W.MatchString(line) {
+		args = empty.Split(line, -1)
+		if len(args) < 3 {
+			return nil, Err("W error:%v", "argument is less 3")
+		}
+		T = "W"
+		args = args[1:]
+	} else if c_reg_D.MatchString(line) {
+		args = empty.Split(line, -1)
+		if len(args) < 2 {
+			return nil, Err("D error:%v", "argument is less 3")
+		}
+		T = "D"
+		args = args[1:]
 	} else {
-		// panic(11)
 		return nil, Err("invalid line(%v)", line)
 	}
 	return c.cline(T, line, args, onexeced), nil

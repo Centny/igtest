@@ -32,6 +32,9 @@ func TestCompiler(t *testing.T) {
 	c.NewLine("HRR ", nil)
 	c.NewLine("Y", nil)
 	c.NewLine("N", nil)
+	c.NewLine("R", nil)
+	c.NewLine("W", nil)
+	c.NewLine("D", nil)
 	c = Compiler{}
 	wd, _ := os.Getwd()
 	err = c.PreCompile([]byte(fmt.Sprintf("INC %v/%v", wd, "test/sub.ig")))

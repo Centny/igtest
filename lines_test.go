@@ -63,6 +63,12 @@ func TestSub(t *testing.T) {
 	l.exec(NewCtx(nil), false)
 	l.T = "XX"
 	l.exec(NewCtx(nil), false)
+	l.T = "R"
+	l.exec(NewCtx(nil), false)
+	l.T = "D"
+	l.exec(NewCtx(nil), false)
+	l.T = "W"
+	l.exec(NewCtx(nil), false)
 	//
 	l = Line{}
 	l.C = c

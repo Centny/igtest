@@ -130,3 +130,12 @@ execute subscript by argument k1 and k2
 ```
 SUB /tmp/ab.s va=123 vb=abc
 ```
+
+####R filepath
+read file context
+
+####W filepath content
+write file
+
+####D filepath
+delete file
