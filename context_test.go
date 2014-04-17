@@ -20,6 +20,9 @@ func TestBc(t *testing.T) {
 	ctx.Kvs["abc"] = util.Map{
 		"ab": 123,
 	}
+	ctx.SET("ab", "11")
+	ctx.SET("abdd", 11)
+	fmt.Println(ctx.GET("ab"))
 	ctx.Kvs["a"] = 11
 	fmt.Println(ctx.Kvs.StrValP("/abc/ab"))
 	fmt.Println(ctx.Compile("$a+$(/abc/ab)"))
@@ -51,9 +54,11 @@ func TestBc(t *testing.T) {
 		return
 	}
 	fmt.Println(err)
-
+	ctx.BC("")
 	//
 	fmt.Println(ctx.Join("$a", "$(/abc/ab)"))
+	ctx.ShowLog = true
+	ctx.log("kkkk")
 }
 func TestHr(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -63,6 +68,13 @@ func TestHr(t *testing.T) {
 		fmt.Println(r.FormFile("file"))
 		w.Write([]byte("OKK"))
 	}))
+	ts2 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(
+			`
+			{"abc":11}
+			`))
+
+	}))
 	ctx := NewCtx(nil)
 	ctx.HG(ts.URL, "a=1", "b=2", "^kk=11", "#code=aa", "#data=bb", "#err=cc")
 	ctx.P("$aa", "$bb", "$cc")
@@ -70,7 +82,11 @@ func TestHr(t *testing.T) {
 	defer os.Remove("/tmp/11122.txt")
 	ctx.HP(ts.URL, "a=2", "b=3", "^kk=kkk", "%file=/tmp/11122.txt", "#code=aa", "#data=bb", "#err=cc")
 	ctx.P("$aa", "$bb", "$cc")
-	// ctx.HP("kkk", "a=2", "b=3", "^kk=kkk", "%file=/tmp/11122.txt", "#code=aa", "#data=bb", "#err=cc")
+	ctx.HP("kkk", "a=2", "b=3", "^kk=kkk", "%file=/tmp/11122.txt", "#code=aa", "#data=bb", "#err=cc")
+	ctx.HP(ts.URL, "a=2", "b=3", "^kk", "#code=aa", "#data=bb", "#err=cc")
+	ctx.HP()
+	ctx.HR("MM", "kkkk")
+	ctx.HP(ts2.URL, "a=2", "b=3", "^kk", "#code=aa", "#data=bb", "#err=cc")
 }
 func TestEx(t *testing.T) {
 	ctx := NewCtx(nil)
@@ -78,6 +94,7 @@ func TestEx(t *testing.T) {
 	ctx.P("$kk")
 	ctx.EX("/bin/echo", `abbb`, "#aa", "#data=kk", "#err=ekk")
 	ctx.EX("/bin/eco", `{\"abc\":123}`, "#aa", "#data=kk", "#err=ekk")
+	NewCtx(ctx)
 }
 func TestRead(t *testing.T) {
 	fmt.Println(os.Getwd())
@@ -94,7 +111,7 @@ func TestRead(t *testing.T) {
 	fmt.Println(string(line), err)
 }
 
-func TestExec(t *testing.T) {
+func TestExecCmd(t *testing.T) {
 	data, err := exec.Command("/bin/sh", "-c", "'/bin/echo 1+2 | /bin/echo'").Output()
 	fmt.Println(string(data), err)
 }

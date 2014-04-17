@@ -20,22 +20,39 @@ var v1_reg = regexp.MustCompile("\\$[a-zA-Z0-9]+")
 var v2_reg = regexp.MustCompile("\\$\\([^\\)]+\\)")
 
 type Ctx struct {
-	Parent *Ctx
-	Kvs    util.Map
-	H      util.HClient
+	Parent  *Ctx
+	Kvs     util.Map
+	H       util.HClient
+	ShowLog bool
 }
 
+func (c *Ctx) log(f string, args ...interface{}) {
+	if c.ShowLog {
+		log.D(f, args...)
+	}
+}
 func (c *Ctx) GET(path string) string {
 	return c.Kvs.StrValP(c.Compile(path))
 }
 
-func (c *Ctx) SET(path string, val string) error {
-	return c.Kvs.SetValP(c.Compile(path), c.Compile(val))
+func (c *Ctx) SET(path string, val interface{}) error {
+	if sval, ok := val.(string); ok {
+		sval = c.Compile(sval)
+		js, err := util.Json2Map(sval)
+		if err == nil {
+			return c.Kvs.SetValP(c.Compile(path), js)
+		} else {
+			return c.Kvs.SetValP(c.Compile(path), sval)
+		}
+	} else {
+		return c.Kvs.SetValP(c.Compile(path), val)
+	}
 }
 
 func (c *Ctx) Join(args ...string) string {
 	var buf bytes.Buffer
 	for _, arg := range args {
+		// fmt.Println(arg)
 		buf.WriteString(c.Compile(arg))
 	}
 	return buf.String()
@@ -47,7 +64,7 @@ func (c *Ctx) BC(exp string) (float64, error) {
 		return 0, errors.New("express is emtpy")
 	}
 	cexp := c.Compile(exp)
-	log.D("BC %v", cexp)
+	c.log("BC %v", cexp)
 	cmd := exec.Command(C_BC, "-l")
 	w, _ := cmd.StdinPipe()
 	r, _ := cmd.StdoutPipe()
@@ -88,7 +105,8 @@ func (c *Ctx) HR(args ...string) (int, string, error) {
 	if len(args) < 2 {
 		return 0, "", errors.New(fmt.Sprintf("Usage:method url args"))
 	}
-	var turl = args[1]
+	var turl = c.Compile(args[1])
+	var method = c.Compile(args[0])
 	fkey, fp := "", ""
 	fields := map[string]string{}
 	header := map[string]string{}
@@ -111,16 +129,16 @@ func (c *Ctx) HR(args ...string) (int, string, error) {
 	var code int
 	var data string
 	var err error
-	if args[0] == "POST" {
-		log.D("POST(%v) fileds(%v) header(%v) fkey(%v) fpath(%v)", turl, fields, header, fkey, fp)
+	if method == "POST" {
+		c.log("POST(%v) fileds(%v) header(%v) fkey(%v) fpath(%v)", turl, fields, header, fkey, fp)
 		code, data, err = c.H.HPostF_H(turl, fields, header, fkey, fp)
-	} else if args[0] == "GET" {
+	} else if method == "GET" {
 		vs := url.Values{}
 		for k, v := range fields {
 			vs.Add(k, v)
 		}
 		turl = fmt.Sprintf("%v?%v", turl, vs.Encode())
-		log.D("GET(%v) header(%v)", turl, header)
+		c.log("GET(%v) header(%v)", turl, header)
 		code, data, err = c.H.HGet_H(header, turl)
 	} else {
 		return 0, "", errors.New(fmt.Sprintf("unknow method(%v)", args[0]))
@@ -178,17 +196,18 @@ func (c *Ctx) EX(args ...string) (string, error) {
 			}
 			exec_res[strings.Trim(kv[0], "#")] = kv[1]
 		} else {
-			nargs = append(nargs, a)
+			nargs = append(nargs, c.Compile(a))
 		}
 	}
 	bys, err := exec.Command(C_SH, "-c", strings.Join(nargs, " ")).Output()
 	data := string(bys)
 	if k, ok := exec_res["data"]; ok {
 		js, err := util.Json2Map(data)
+
 		if err == nil {
 			c.Kvs.SetVal(k, js)
 		} else {
-			c.Kvs.SetVal(k, data)
+			c.Kvs.SetVal(k, strings.Trim(data, "\t \n"))
 		}
 	}
 	if k, ok := exec_res["err"]; ok && err != nil {
@@ -196,6 +215,7 @@ func (c *Ctx) EX(args ...string) (string, error) {
 	}
 	return data, err
 }
+
 func NewCtx(p *Ctx) *Ctx {
 	ctx := &Ctx{}
 	ctx.Kvs = util.Map{}

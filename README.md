@@ -6,7 +6,8 @@
 ##Variable
 * $a=1
 * $b=$a
-* $c=$a,$d=@{$a+$b}
+* $c=$a
+* $d=@{$a+$b}
 * $d=$(/abc/v)
 
 ##Expression
@@ -20,6 +21,8 @@
 * @[command expression]
 
 ##Commands
+####Y $a
+####N $a
 ####BC $a*$b
 ####SET path value
 set value to context.
