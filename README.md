@@ -1,3 +1,6 @@
+Integration test framework by golang
+=========
+
 ##Store Value Path
 * /abc/v
 * /abc/1/a
@@ -9,6 +12,8 @@
 * $c=$a
 * $d=@{$a+$b}
 * $d=$(/abc/v)
+* $d=$(/abc/@length) //array length
+* $d=$(/abc/1) 		 //array value
 
 ##Expression
 * @{$a*$b}
@@ -21,11 +26,17 @@
 * @[command expression]
 
 ##Commands
-####Y $a
-####N $a
+####Y $a 
+assert value is valid
+
+####N $a 
+assert value is invalid
+
 ####BC $a*$b
+execute the bc command
+
 ####SET path value
-set value to context.
+store value to context.
 
 * path:value store path
 * value:store value

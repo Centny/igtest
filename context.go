@@ -144,9 +144,11 @@ func (c *Ctx) HR(args ...string) (int, string, error) {
 		return 0, "", errors.New(fmt.Sprintf("unknow method(%v)", args[0]))
 	}
 	if k, ok := exec_res["code"]; ok {
+		k = c.Compile(k)
 		c.Kvs.SetVal(k, code)
 	}
 	if k, ok := exec_res["data"]; ok {
+		k = c.Compile(k)
 		js, err := util.Json2Map(data)
 		if err == nil {
 			c.Kvs.SetVal(k, js)
