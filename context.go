@@ -134,6 +134,7 @@ func (c *Ctx) HR(args ...string) (int, string, error) {
 	if method == "POST" {
 		c.log("POST(%v) fileds(%v) header(%v) fkey(%v) fpath(%v)", turl, fields, header, fkey, fp)
 		code, data, err = c.H.HPostF_H(turl, fields, header, fkey, fp)
+		c.log("POST response data:%v", data)
 	} else if method == "GET" {
 		vs := url.Values{}
 		for k, v := range fields {
@@ -142,6 +143,7 @@ func (c *Ctx) HR(args ...string) (int, string, error) {
 		turl = fmt.Sprintf("%v?%v", turl, vs.Encode())
 		c.log("GET(%v) header(%v)", turl, header)
 		code, data, err = c.H.HGet_H(header, turl)
+		c.log("GET response data:%v", data)
 	} else {
 		return 0, "", errors.New(fmt.Sprintf("unknow method(%v)", args[0]))
 	}
@@ -205,6 +207,7 @@ func (c *Ctx) EX(args ...string) (string, error) {
 	}
 	bys, err := exec.Command(C_SH, "-c", strings.Join(nargs, " ")).Output()
 	data := string(bys)
+	c.log("EX response data:%v", data)
 	if k, ok := exec_res["data"]; ok {
 		js, err := util.Json2Map(data)
 
