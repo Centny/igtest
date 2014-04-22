@@ -21,10 +21,6 @@ func (j *JsonMarker) new(l *Line, ctx *Ctx) util.Map {
 		name = ctx.Compile(l.Args[0])
 	}
 	f := l.C.F
-	wd, _ := os.Getwd()
-	f = strings.TrimPrefix(f, wd)
-	f = strings.TrimPrefix(f, "/")
-	// fmt.Println(f)
 	return util.Map{
 		"file": f,
 		"line": l.Num,
@@ -72,6 +68,7 @@ func (j *JsonMarker) Store() error {
 	if len(j.Path) < 1 {
 		return errors.New("Path not set")
 	}
+	os.Remove(j.Path)
 	return j.StoreF(j.Path)
 }
 

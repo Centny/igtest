@@ -193,7 +193,13 @@ func (l *Line) Sub(ctx *Ctx, left bool) (interface{}, error) {
 		}
 		nctx.Kvs[ctx.Compile(kvs[0])] = ctx.Compile(kvs[1])
 	}
-	if nctx != ctx && ctx.Mark != nil {
+	if ctx.Mark != nil {
+		if nctx == ctx {
+			om := ctx.Mark
+			defer func() {
+				ctx.Mark = om
+			}()
+		}
 		nctx.Mark = ctx.Mark.Sub(l, ctx)
 	}
 	c := Compiler{}
@@ -232,6 +238,11 @@ func (l *Line) Assign(ctx *Ctx, left bool) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
+	} else if c_reg_BC2.MatchString(l.Args[1]) {
+		v, err = ctx.BC(l.Args[1])
+		if err != nil {
+			return nil, err
+		}
 	} else {
 		v = l.Args[1]
 	}
@@ -265,13 +276,22 @@ func (l *Line) Y(ctx *Ctx, left bool) (interface{}, error) {
 	if len(l.Args) < 1 {
 		return nil, Err("Usage:Y $a,but:%v", l.L)
 	}
-	nl, err := l.C.NewLine(l.Args[0], l.Num, l.OnExeced)
-	if err != nil {
-		return nil, err
-	}
-	v, err := nl.Exec(ctx, false)
-	if err != nil {
-		return nil, err
+	var v interface{} = nil
+	var err error = nil
+	if c_reg_BC2.MatchString(l.Args[0]) {
+		v, err = ctx.BC(l.Args[0])
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		nl, err := l.C.NewLine(l.Args[0], l.Num, l.OnExeced)
+		if err != nil {
+			return nil, err
+		}
+		v, err = nl.Exec(ctx, false)
+		if err != nil {
+			return nil, err
+		}
 	}
 	if !ValY(v) {
 		return false, Err("line(%v) expected YES but NO in %v:%v", l.L, l.C.F, l.Num)
@@ -283,13 +303,22 @@ func (l *Line) N(ctx *Ctx, left bool) (interface{}, error) {
 	if len(l.Args) < 1 {
 		return nil, Err("Usage:N $a,but:%v", l.L)
 	}
-	nl, err := l.C.NewLine(l.Args[0], l.Num, l.OnExeced)
-	if err != nil {
-		return nil, err
-	}
-	v, err := nl.Exec(ctx, false)
-	if err != nil {
-		return nil, err
+	var v interface{} = nil
+	var err error = nil
+	if c_reg_BC2.MatchString(l.Args[0]) {
+		v, err = ctx.BC(l.Args[0])
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		nl, err := l.C.NewLine(l.Args[0], l.Num, l.OnExeced)
+		if err != nil {
+			return nil, err
+		}
+		v, err = nl.Exec(ctx, false)
+		if err != nil {
+			return nil, err
+		}
 	}
 	if ValY(v) {
 		return false, Err("line(%v) expected NO but YES in %v:%v", l.L, l.C.F, l.Num)

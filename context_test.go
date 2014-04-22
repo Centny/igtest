@@ -166,3 +166,10 @@ func TestAwr(t *testing.T) {
 	os.Remove("/tmp/aaa2")
 	os.Remove("/tmp/aaa3")
 }
+
+func TestValName(t *testing.T) {
+	ctx := NewCtx(nil)
+	ctx.SET("A_B", 11111)
+	fmt.Println(ctx.Compile("$A_B"))
+	fmt.Println(ctx.Compile("$(A_B)"))
+}

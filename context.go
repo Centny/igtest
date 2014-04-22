@@ -18,7 +18,7 @@ import (
 	"strings"
 )
 
-var v1_reg = regexp.MustCompile("\\$[a-zA-Z0-9]+")
+var v1_reg = regexp.MustCompile("\\$[a-zA-Z0-9_]+")
 var v2_reg = regexp.MustCompile("\\$\\([^\\)]+\\)")
 
 type Marker interface {
@@ -57,9 +57,13 @@ func (c *Ctx) SET(path string, val interface{}) error {
 			return c.Kvs.SetValP(c.Compile(path), ary)
 		}
 		// c.log("convert to json object err:%v", err.Error())
-		return c.Kvs.SetValP(c.Compile(path), sval)
+		spath := c.Compile(path)
+		c.log("SET %v %v", spath, sval)
+		return c.Kvs.SetValP(spath, sval)
 	} else {
-		return c.Kvs.SetValP(c.Compile(path), val)
+		spath := c.Compile(path)
+		c.log("SET %v %v", spath, val)
+		return c.Kvs.SetValP(spath, val)
 	}
 }
 
@@ -78,7 +82,7 @@ func (c *Ctx) BC(exp string) (float64, error) {
 		return 0, errors.New("express is emtpy")
 	}
 	cexp := c.Compile(exp)
-	c.log("BC %v", cexp)
+	c.log("BC %v(%v)", exp, cexp)
 	cmd := exec.Command(C_BC, "-l")
 	w, _ := cmd.StdinPipe()
 	r, _ := cmd.StdoutPipe()
@@ -161,19 +165,19 @@ func (c *Ctx) HR(args ...string) (int, string, error) {
 	}
 	if k, ok := exec_res["code"]; ok {
 		k = c.Compile(k)
-		c.Kvs.SetVal(k, code)
+		c.SET(k, code)
 	}
 	if k, ok := exec_res["data"]; ok {
 		k = c.Compile(k)
 		js, err := util.Json2Map(data)
 		if err == nil {
-			c.Kvs.SetVal(k, js)
+			c.SET(k, js)
 		} else {
-			c.Kvs.SetVal(k, data)
+			c.SET(k, data)
 		}
 	}
 	if k, ok := exec_res["err"]; ok && err != nil {
-		c.Kvs.SetVal(k, err.Error())
+		c.SET(k, err.Error())
 	}
 	return code, data, err
 }
@@ -224,13 +228,13 @@ func (c *Ctx) EX(args ...string) (string, error) {
 		js, err := util.Json2Map(data)
 
 		if err == nil {
-			c.Kvs.SetVal(k, js)
+			c.SET(k, js)
 		} else {
-			c.Kvs.SetVal(k, strings.Trim(data, "\t \n"))
+			c.SET(k, strings.Trim(data, "\t \n"))
 		}
 	}
 	if k, ok := exec_res["err"]; ok && err != nil {
-		c.Kvs.SetVal(k, err.Error())
+		c.SET(k, err.Error())
 	}
 	return data, err
 }

@@ -48,11 +48,11 @@ SUB sub.ig -CTX
 BC $a*$b
 SET aa 123
 GET aa
-HR GET http:\/\/192.168.1.1 #data=dkk
+HR GET http:\/\/localhost #data=dkk
 // P $dkk
-HR POST http:\/\/192.168.1.1
-HP http:\/\/192.168.1.1
-HG http:\/\/192.168.1.1
+HR POST http:\/\/localhost
+HP http:\/\/localhost
+HG http:\/\/localhost
 EX /bin/echo abc
 EX ls #data=ls
 P $ls
@@ -84,3 +84,14 @@ $ary=["A","B"]
 $len=$(/ary/@len)
 P $(/ary/0)
 M mmmm
+
+//
+$val=100
+$cval=1>2
+$cval2=$val<1
+$cval3=$val*100
+$cval4=$val/100
+P $cval $cval2 $cval3 $cval4
+
+$A_B=1111
+P $A_B

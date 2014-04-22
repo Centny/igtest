@@ -312,6 +312,10 @@ func (c *Compiler) ShowLine() {
 	}
 }
 
+func NewCompiler() *Compiler {
+	return &Compiler{}
+}
+
 func ShowLine(ls []*Line, inner int) {
 	pre := ""
 	for i := 0; i < inner; i++ {
