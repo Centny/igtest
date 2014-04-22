@@ -33,5 +33,7 @@ cat coverage.json | gocov-html coverage.json > coverage.html
 
 ######
 go install github.com/Centny/igtest/igr
-cd $GOPATH/src/github.com/Centny/igtest/reporter
+cd $GOPATH/src/github.com/Centny/igtest
+git pull
+cd reporter
 ./install $GOPATH/bin
