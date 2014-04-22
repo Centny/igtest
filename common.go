@@ -17,6 +17,9 @@ func ValY(v interface{}) bool {
 	if v == nil {
 		return false
 	}
+	if bv, ok := v.(bool); ok {
+		return bv
+	}
 	iv := util.IntVal(v)
 	if iv != math.MaxInt64 {
 		return iv != 0

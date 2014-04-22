@@ -41,4 +41,7 @@ func TestJme(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
+	NewJME("/tmp/tt.json", "test/ex.ig").Exec()
+	NewJME("/tmp/tt.json", "test/err.ig").Exec()
+	NewJME("/kk/k/tt.json", "test/exec.ig").Exec()
 }

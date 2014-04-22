@@ -83,7 +83,8 @@ func TestSub(t *testing.T) {
 	l.Assign(NewCtx(nil), false)
 	l.Args = []string{"$a", "@[sssss"}
 	l.Assign(NewCtx(nil), false)
-
+	l.Args = []string{"$a", "$a<b"}
+	l.Assign(NewCtx(nil), false)
 	//
 	l = Line{}
 	l.C = c
@@ -96,6 +97,9 @@ func TestSub(t *testing.T) {
 	l.Y(NewCtx(nil), false)
 	l.N(NewCtx(nil), false)
 	l.Args = []string{"aaaa"}
+	l.Y(NewCtx(nil), false)
+	l.N(NewCtx(nil), false)
+	l.Args = []string{"$a<b"}
 	l.Y(NewCtx(nil), false)
 	l.N(NewCtx(nil), false)
 	l.Args = []string{"EX kkkk"}

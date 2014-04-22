@@ -244,7 +244,13 @@ func (l *Line) Assign(ctx *Ctx, left bool) (interface{}, error) {
 			return nil, err
 		}
 	} else {
-		v = l.Args[1]
+		sv := ctx.Compile(l.Args[1])
+		vs := strings.SplitN(sv, "==", 2)
+		if len(vs) == 2 && vs[0] == vs[1] {
+			v = 1
+		} else {
+			v = sv
+		}
 	}
 	err = ctx.SET(strings.Trim(l.Args[0], " \t$()"), v)
 	return true, err
@@ -255,6 +261,7 @@ func (l *Line) Exp(ctx *Ctx, left bool) (interface{}, error) {
 		return nil, Err("Invalid expression:%v", l.L)
 	}
 	exp := l.Args[0]
+	fmt.Println(exp, ",,,,")
 	if e_reg_c.MatchString(exp) {
 		nl, err := l.C.NewLine(strings.Trim(exp, " \t @[]"), l.Num, l.OnExeced)
 		if err != nil {
@@ -265,8 +272,6 @@ func (l *Line) Exp(ctx *Ctx, left bool) (interface{}, error) {
 		return ctx.BC(strings.Trim(exp, " \t@{}"))
 	} else if e_reg_s.MatchString(exp) {
 		return ctx.Join(strings.Split(strings.Trim(exp, " \t @()"), "+")...), nil
-	} else if e_reg_v.MatchString(exp) {
-		return ctx.Compile(exp), nil
 	} else {
 		return nil, Err("invalid express(%v)", exp)
 	}
@@ -284,13 +289,12 @@ func (l *Line) Y(ctx *Ctx, left bool) (interface{}, error) {
 			return nil, err
 		}
 	} else {
-		nl, err := l.C.NewLine(l.Args[0], l.Num, l.OnExeced)
-		if err != nil {
-			return nil, err
-		}
-		v, err = nl.Exec(ctx, false)
-		if err != nil {
-			return nil, err
+		sv := ctx.Compile(l.Args[0])
+		vs := strings.SplitN(sv, "==", 2)
+		if len(vs) == 2 && vs[0] == vs[1] {
+			v = 1
+		} else {
+			v = sv
 		}
 	}
 	if !ValY(v) {
@@ -311,13 +315,12 @@ func (l *Line) N(ctx *Ctx, left bool) (interface{}, error) {
 			return nil, err
 		}
 	} else {
-		nl, err := l.C.NewLine(l.Args[0], l.Num, l.OnExeced)
-		if err != nil {
-			return nil, err
-		}
-		v, err = nl.Exec(ctx, false)
-		if err != nil {
-			return nil, err
+		sv := ctx.Compile(l.Args[0])
+		vs := strings.SplitN(sv, "==", 2)
+		if len(vs) == 2 {
+			v = vs[0] == vs[1]
+		} else {
+			v = sv
 		}
 	}
 	if ValY(v) {

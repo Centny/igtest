@@ -37,7 +37,7 @@ P $(/js/a)
 Y $(/js/a)
 N $(/js/b)
 
-$(/js/a)
+// $(/js/a)
 
 SUB sub.ig kk=111111 aa=444444 -cookie -ig
 SUB sub.ig kk=111111 aa=444444
@@ -91,7 +91,18 @@ $cval=1>2
 $cval2=$val<1
 $cval3=$val*100
 $cval4=$val/100
-P $cval $cval2 $cval3 $cval4
+$cval5=@{$cval4}
+P $cval $cval2 $cval3 $cval4 $cval5
 
 $A_B=1111
 P $A_B
+
+$sss=a==a
+Y $sss
+Y a==a
+$va=a
+$vb=a
+$vc=$va==$vb
+Y $va==$vb
+Y $vc
+N a==1
