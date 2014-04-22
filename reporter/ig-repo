@@ -1,0 +1,14 @@
+#!/bin/bash
+if [ $# -lt 2 ]; then
+ echo "Usage:ig-repo <json file> name"
+ exit
+fi
+pwd=`pwd`
+json=$1
+name=$2
+data=`cat $json`
+echo var title=\"Coverage Report\($name\)\"\; >$name.js
+echo var $name=$data\; >>$name.js
+dp=`dirname ${0}`
+$dp/dxtree/install $pwd $name
+

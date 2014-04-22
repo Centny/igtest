@@ -13,10 +13,11 @@ import (
 type Line struct {
 	T        string
 	L        string
+	C        *Compiler
 	Pre      *Line
 	Args     []string
 	Lines    []*Line
-	C        *Compiler
+	Num      int
 	OnExeced OnExecedFunc
 }
 
@@ -38,40 +39,40 @@ func (l *Line) exec(ctx *Ctx, left bool) (interface{}, error) {
 	switch l.T {
 	case "BC":
 		if len(l.Args) < 1 {
-			return nil, Err("Usage:BC $a*$b,but:%v", l.L)
+			return nil, Err("Usage:BC $a*$b,but:%v in %v:%v", l.L, l.C.F, l.Num)
 		}
 		return ctx.BC(l.Args[0])
 	case "SET":
 		if len(l.Args) < 2 {
-			return nil, Err("Usage:SET path value,but:%v", l.L)
+			return nil, Err("Usage:SET path value,but:%v in %v:%v", l.L, l.C.F, l.Num)
 		}
 		return true, ctx.SET(l.Args[0], l.Args[1])
 	case "GET":
 		if len(l.Args) < 1 {
-			return nil, Err("Usage:GET path,but:%v", l.L)
+			return nil, Err("Usage:GET path,but:%v in %v:%v", l.L, l.C.F, l.Num)
 		}
 		return ctx.GET(l.Args[0]), nil
 	case "HR":
 		if len(l.Args) < 2 {
-			return nil, Err("Usage:HR method url key=val ... ,but:%v", l.L)
+			return nil, Err("Usage:HR method url key=val ... ,but:%v in %v:%v", l.L, l.C.F, l.Num)
 		}
 		_, v, err := ctx.HR(l.Args...)
 		return v, err
 	case "HP":
 		if len(l.Args) < 1 {
-			return nil, Err("Usage:HP url key=val ... ,but:%v", l.L)
+			return nil, Err("Usage:HP url key=val ... ,but:%v in %v:%v", l.L, l.C.F, l.Num)
 		}
 		_, v, err := ctx.HP(l.Args...)
 		return v, err
 	case "HG":
 		if len(l.Args) < 1 {
-			return nil, Err("Usage:HG url key=val ... ,but:%v", l.L)
+			return nil, Err("Usage:HG url key=val ... ,but:%v in %v:%v", l.L, l.C.F, l.Num)
 		}
 		_, v, err := ctx.HG(l.Args...)
 		return v, err
 	case "EX":
 		if len(l.Args) < 1 {
-			return nil, Err("Usage:EX cmd args ... ,but:%v", l.L)
+			return nil, Err("Usage:EX cmd args ... ,but:%v in %v:%v", l.L, l.C.F, l.Num)
 		}
 		return ctx.EX(l.Args...)
 	case "P":
@@ -79,19 +80,25 @@ func (l *Line) exec(ctx *Ctx, left bool) (interface{}, error) {
 		return true, nil
 	case "R":
 		if len(l.Args) < 1 {
-			return nil, Err("Usage:R filepath ,but:%v", l.L)
+			return nil, Err("Usage:R filepath ,but:%v in %v:%v", l.L, l.C.F, l.Num)
 		}
 		return ctx.R(l.Args...)
 	case "W":
 		if len(l.Args) < 2 {
-			return nil, Err("Usage:W filepath $val ,but:%v", l.L)
+			return nil, Err("Usage:W filepath $val ,but:%v in %v:%v", l.L, l.C.F, l.Num)
 		}
 		return true, ctx.W(l.Args...)
 	case "D":
 		if len(l.Args) < 1 {
-			return nil, Err("Usage:D filepath ,but:%v", l.L)
+			return nil, Err("Usage:D filepath ,but:%v in %v:%v", l.L, l.C.F, l.Num)
 		}
 		return true, ctx.D(l.Args...)
+	case "M":
+		if len(l.Args) < 1 {
+			return nil, Err("Usage:M msg ,but:%v in %v:%v", l.L, l.C.F, l.Num)
+		}
+		ctx.M(l)
+		return true, nil
 	case "SUB":
 		return l.Sub(ctx, left)
 	case "FOR":
@@ -105,7 +112,7 @@ func (l *Line) exec(ctx *Ctx, left bool) (interface{}, error) {
 	case "ASSIGN":
 		return l.Assign(ctx, left)
 	default:
-		return nil, Err("invalid line type(%v):%v", l.T, l.L)
+		return nil, Err("invalid command in %v:%v", l.L, l.C.F, l.Num)
 	}
 }
 
@@ -157,7 +164,7 @@ func (l *Line) For(ctx *Ctx, left bool) (interface{}, error) {
 	} else if l.Args[1] == "IN" {
 		return l.for_in(ctx, left)
 	} else {
-		return nil, Err("invalid for(%v) option:%v", l.L, l.Args[1])
+		return nil, Err("invalid for(%v) option:%v in %v:%v", l.L, l.Args[1], l.C.F, l.Num)
 	}
 }
 
@@ -167,9 +174,10 @@ func (l *Line) Sub(ctx *Ctx, left bool) (interface{}, error) {
 	}
 	var ignore_err bool = false
 	nctx := NewCtx(ctx)
-	for _, arg := range l.Args[0:] {
+	for _, arg := range l.Args {
 		if arg == "-CTX" { //setting the same context to sub
 			nctx = ctx
+			continue
 		}
 		if arg == "-cookie" { //setting cookie to sub
 			nctx.H = ctx.H
@@ -184,6 +192,9 @@ func (l *Line) Sub(ctx *Ctx, left bool) (interface{}, error) {
 			continue
 		}
 		nctx.Kvs[ctx.Compile(kvs[0])] = ctx.Compile(kvs[1])
+	}
+	if nctx != ctx && ctx.Mark != nil {
+		nctx.Mark = ctx.Mark.Sub(l, ctx)
 	}
 	c := Compiler{}
 	tpath := ctx.Compile(l.Args[0])
@@ -216,7 +227,7 @@ func (l *Line) Assign(ctx *Ctx, left bool) (interface{}, error) {
 	var v interface{} = nil
 	var err error = nil
 	if c_reg_EXP.MatchString(l.Args[1]) {
-		nl, _ := l.C.NewLine(l.Args[1], l.OnExeced)
+		nl, _ := l.C.NewLine(l.Args[1], l.Num, l.OnExeced)
 		v, err = nl.Exec(ctx, false)
 		if err != nil {
 			return nil, err
@@ -234,7 +245,7 @@ func (l *Line) Exp(ctx *Ctx, left bool) (interface{}, error) {
 	}
 	exp := l.Args[0]
 	if e_reg_c.MatchString(exp) {
-		nl, err := l.C.NewLine(strings.Trim(exp, " \t @[]"), l.OnExeced)
+		nl, err := l.C.NewLine(strings.Trim(exp, " \t @[]"), l.Num, l.OnExeced)
 		if err != nil {
 			return nil, err
 		}
@@ -254,7 +265,7 @@ func (l *Line) Y(ctx *Ctx, left bool) (interface{}, error) {
 	if len(l.Args) < 1 {
 		return nil, Err("Usage:Y $a,but:%v", l.L)
 	}
-	nl, err := l.C.NewLine(l.Args[0], l.OnExeced)
+	nl, err := l.C.NewLine(l.Args[0], l.Num, l.OnExeced)
 	if err != nil {
 		return nil, err
 	}
@@ -263,7 +274,7 @@ func (l *Line) Y(ctx *Ctx, left bool) (interface{}, error) {
 		return nil, err
 	}
 	if !ValY(v) {
-		return false, Err("line(%v) expected YES but NO", l.L)
+		return false, Err("line(%v) expected YES but NO in %v:%v", l.L, l.C.F, l.Num)
 	}
 	return true, nil
 }
@@ -272,7 +283,7 @@ func (l *Line) N(ctx *Ctx, left bool) (interface{}, error) {
 	if len(l.Args) < 1 {
 		return nil, Err("Usage:N $a,but:%v", l.L)
 	}
-	nl, err := l.C.NewLine(l.Args[0], l.OnExeced)
+	nl, err := l.C.NewLine(l.Args[0], l.Num, l.OnExeced)
 	if err != nil {
 		return nil, err
 	}
@@ -281,7 +292,7 @@ func (l *Line) N(ctx *Ctx, left bool) (interface{}, error) {
 		return nil, err
 	}
 	if ValY(v) {
-		return false, Err("line(%v) expected NO but YES", l.L)
+		return false, Err("line(%v) expected NO but YES in %v:%v", l.L, l.C.F, l.Num)
 	}
 	return true, nil
 }

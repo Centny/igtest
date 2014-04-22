@@ -2,6 +2,7 @@ package igtest
 
 import (
 	"fmt"
+	"strings"
 )
 
 const Version string = "Beta v0.1.0"
@@ -25,8 +26,11 @@ func ExecCtx(fname string, ctx *Ctx) error {
 }
 
 func usage() {
-	fmt.Println(`Usage:igr [-l -m mode] file ...
+	fmt.Println(`Usage:igr [-l -m mode -R type -r file] file ...
+ -h show this
  -l show log
+ -R the report data type
+ -r the report store path
  -m mode in YOE/EYOE/NONE
   YOE assert on execute all command
   EYOE assert on expression
@@ -34,17 +38,36 @@ func usage() {
 }
 func Run(args []string) int {
 	var log bool = false
-	var mode string = "YOE" //EYOE
+	var mode string = "YOE" //EYOE or YOE
+	var repo string = "JSON"
+	var repof string = ""
 	var fset []string = []string{}
+	ctx := NewCtx(nil)
 	for i := 0; i < len(args); i++ {
 		a := args[i]
-		if a == "-l" {
+		if a == "-h" {
+			usage()
+			return 0
+		} else if a == "-l" {
 			log = true
 		} else if a == "-m" {
 			if i != len(args)-1 {
 				mode = args[i+1]
 				i++
 			}
+		} else if a == "-R" {
+			if i != len(args)-1 {
+				repo = args[i+1]
+				i++
+			}
+		} else if a == "-r" {
+			if i != len(args)-1 {
+				repof = args[i+1]
+				i++
+			}
+		} else if e_reg_kv.MatchString(a) {
+			kv := strings.SplitN(a, "=", 2)
+			ctx.SET(kv[0], kv[1])
 		} else {
 			fset = append(fset, a)
 		}
@@ -66,7 +89,14 @@ func Run(args []string) int {
 		usage()
 		return 1
 	}
-	ctx := NewCtx(nil)
+	switch repo {
+	case "JSON":
+		ctx.Mark = NewJsonMarker(repof)
+	default:
+		fmt.Println("invalid report format:", repo)
+		usage()
+		return 1
+	}
 	ctx.ShowLog = log
 	c := Compiler{}
 	for _, f := range fset {
@@ -77,6 +107,13 @@ func Run(args []string) int {
 		}
 		ctx.SET("CWD", c.Cwd)
 		err = c.CompileAndExec(ctx, oexec)
+		if err != nil {
+			fmt.Println(err.Error())
+			return 1
+		}
+	}
+	if len(repof) > 0 {
+		err := ctx.Mark.Store()
 		if err != nil {
 			fmt.Println(err.Error())
 			return 1

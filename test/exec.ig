@@ -1,7 +1,10 @@
-
+M begin
 $a=1
 $b=2
-
+/* block comment */
+/* 
+block comment 
+*/
 //
 FOR I R 0~3 //jkkk
  P $I
@@ -76,3 +79,8 @@ R /tmp/igtest2 #data=igt2
 Y $(/igt2/abb)
 D /tmp/igtest
 D /tmp/igtest2
+
+$ary=["A","B"]
+$len=$(/ary/@len)
+P $(/ary/0)
+M mmmm

@@ -16,7 +16,8 @@ var c_reg_HP = regexp.MustCompile("^[\\ \\t]*HP([\\t\\ ]+.*)?$")
 var c_reg_EX = regexp.MustCompile("^[\\ \\t]*EX([\\t\\ ]+.*)?$")
 var c_reg_P = regexp.MustCompile("^[\\ \\t]*P([\\t\\ ]+.*)?$")
 var c_reg_SUB = regexp.MustCompile("^[\\ \\t]*SUB([\\t\\ ]+.*)?$")
-var c_reg_INC = regexp.MustCompile("^[\\ \\t]*INC([\\ \t]+.*)?$")
+
+// var c_reg_INC = regexp.MustCompile("^[\\ \\t]*INC([\\ \t]+.*)?$")
 var c_reg_FOR = regexp.MustCompile("^[\\ \\t]*FOR([\\ \\t]+.*)?$")
 var c_reg_ROF = regexp.MustCompile("^(.*[\\ \\t]+)?ROF[\\ \\t]*$")
 var c_reg_e_ROF = regexp.MustCompile("[\\ \\t]*ROF[\\ \\t]*$")
@@ -26,13 +27,15 @@ var c_reg_N = regexp.MustCompile("^[\\ \\t]*N([\\t\\ ]+.*)?$")
 var c_reg_R = regexp.MustCompile("^[\\ \\t]*R([\\t\\ ]+.*)?$")
 var c_reg_W = regexp.MustCompile("^[\\ \\t]*W([\\t\\ ]+.*)?$")
 var c_reg_D = regexp.MustCompile("^[\\ \\t]*D([\\t\\ ]+.*)?$")
+var c_reg_M = regexp.MustCompile("^[\\ \\t]*M([\\t\\ ]+.*)?$")
 var c_reg_Assign1 = regexp.MustCompile("^[\\ \\t]*\\$[a-zA-Z]+[a-zA-Z0-9\\ \\t]*=.*$")
 var c_reg_Assign2 = regexp.MustCompile("^[\\ \\t]*\\$\\([^\\(]+\\)[\\ \\t]*=.*$")
 var escape = regexp.MustCompile("\\\\.")
 
 //
-var b_reg_cmt = regexp.MustCompile("(?Us)\\n?\\/\\*.*\\*\\/\\n?")
-var l_reg_cmt = regexp.MustCompile("(?U)//.*\\n")
+var b_reg_cmt_beg = regexp.MustCompile("^[\\ \\t]*\\/\\*.*$")
+var b_reg_cmt_end = regexp.MustCompile("^.*\\*\\/[\\ \\t]*$")
+var l_reg_cmt = regexp.MustCompile("//.*\\n?$")
 
 //
 var e_reg_c = regexp.MustCompile("^[\\ \\t]*\\@\\[[^\\]]*\\]$[\\ \\t]*")

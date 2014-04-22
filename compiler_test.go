@@ -21,20 +21,21 @@ func TestCompiler(t *testing.T) {
 	}
 	ShowLine(ls, 0)
 	//
-	c.NewLine("BC ", nil)
-	c.NewLine("SET ", nil)
-	c.NewLine("GET ", nil)
-	c.NewLine("HR ", nil)
-	c.NewLine("HP ", nil)
-	c.NewLine("HG ", nil)
-	c.NewLine("EX ", nil)
-	c.NewLine("SUB ", nil)
-	c.NewLine("HRR ", nil)
-	c.NewLine("Y", nil)
-	c.NewLine("N", nil)
-	c.NewLine("R", nil)
-	c.NewLine("W", nil)
-	c.NewLine("D", nil)
+	c.NewLine("BC ", 1, nil)
+	c.NewLine("SET ", 1, nil)
+	c.NewLine("GET ", 1, nil)
+	c.NewLine("HR ", 1, nil)
+	c.NewLine("HP ", 1, nil)
+	c.NewLine("HG ", 1, nil)
+	c.NewLine("EX ", 1, nil)
+	c.NewLine("SUB ", 1, nil)
+	c.NewLine("HRR ", 1, nil)
+	c.NewLine("Y", 1, nil)
+	c.NewLine("N", 1, nil)
+	c.NewLine("R", 1, nil)
+	c.NewLine("W", 1, nil)
+	c.NewLine("D", 1, nil)
+	c.NewLine("M", 1, nil)
 	c = Compiler{}
 	wd, _ := os.Getwd()
 	err = c.PreCompile([]byte(fmt.Sprintf("INC %v/%v", wd, "test/sub.ig")))
@@ -51,11 +52,11 @@ func TestLoad(t *testing.T) {
 		t.Error(err.Error())
 		return
 	}
-	err = r.Load("test/t2.ig")
-	if err == nil {
-		t.Error("not error")
-		return
-	}
+	// err = r.Load("test/t2.ig")
+	// if err == nil {
+	// 	t.Error("not error")
+	// 	return
+	// }
 	err = r.Load("test/t2.igg")
 	if err == nil {
 		t.Error("not error")

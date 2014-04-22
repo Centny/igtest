@@ -21,11 +21,18 @@ import (
 var v1_reg = regexp.MustCompile("\\$[a-zA-Z0-9]+")
 var v2_reg = regexp.MustCompile("\\$\\([^\\)]+\\)")
 
+type Marker interface {
+	Add(*Line, *Ctx)        //add mark
+	Sub(*Line, *Ctx) Marker //create sub mark.
+	Store() error
+}
+
 type Ctx struct {
 	Parent  *Ctx
 	Kvs     util.Map
 	H       util.HClient
 	ShowLog bool
+	Mark    Marker
 }
 
 func (c *Ctx) log(f string, args ...interface{}) {
@@ -43,9 +50,14 @@ func (c *Ctx) SET(path string, val interface{}) error {
 		js, err := util.Json2Map(sval)
 		if err == nil {
 			return c.Kvs.SetValP(c.Compile(path), js)
-		} else {
-			return c.Kvs.SetValP(c.Compile(path), sval)
 		}
+		// c.log("convert to json object err:%v", err.Error())
+		ary, err := util.Json2Ary(sval)
+		if err == nil {
+			return c.Kvs.SetValP(c.Compile(path), ary)
+		}
+		// c.log("convert to json object err:%v", err.Error())
+		return c.Kvs.SetValP(c.Compile(path), sval)
 	} else {
 		return c.Kvs.SetValP(c.Compile(path), val)
 	}
@@ -297,6 +309,11 @@ func (c *Ctx) D(args ...string) error {
 	err := os.RemoveAll(fpath)
 	c.log("delete file:%v", fpath)
 	return err
+}
+func (c *Ctx) M(l *Line) {
+	if c.Mark != nil {
+		c.Mark.Add(l, c)
+	}
 }
 func NewCtx(p *Ctx) *Ctx {
 	ctx := &Ctx{}

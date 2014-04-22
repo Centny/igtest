@@ -1,0 +1,8 @@
+#!/bin/bash
+td=$1
+name=$2
+dp=`dirname ${0}`
+cp -r $dp/dxtree $td
+cat $dp/index.html | sed "s/\$RNAME/$name/g" > $td/$name.html
+
+

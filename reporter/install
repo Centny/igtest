@@ -1,0 +1,4 @@
+#!/bin/bash
+dp=`dirname ${0}`
+tp=$1
+cp -r dxtree ig-repo $tp

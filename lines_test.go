@@ -48,6 +48,7 @@ func TestSub(t *testing.T) {
 	Exec("test/for.ig")
 	//
 	l = Line{}
+	l.C = c
 	l.T = "BC"
 	l.exec(NewCtx(nil), false)
 	l.T = "SET"
@@ -72,6 +73,8 @@ func TestSub(t *testing.T) {
 	l.exec(NewCtx(nil), false)
 	l.T = "W"
 	l.exec(NewCtx(nil), false)
+	l.T = "M"
+	l.exec(NewCtx(nil), false)
 	//
 	l = Line{}
 	l.C = c
@@ -89,6 +92,7 @@ func TestSub(t *testing.T) {
 	l.For(NewCtx(nil), false)
 	//
 	l = Line{}
+	l.C = c
 	l.Y(NewCtx(nil), false)
 	l.N(NewCtx(nil), false)
 	l.Args = []string{"aaaa"}

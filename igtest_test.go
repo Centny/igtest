@@ -1,25 +1,32 @@
 package igtest
 
 import (
+	"os"
 	"testing"
 )
 
 func TestExec(t *testing.T) {
-	// c := Compiler{}
-	// c.Load("test/tcmt.ig")
-	// c.ShowLine()
-	// ls, _ := c.Compile(nil)
-	// ShowLine(ls, 0)
-	err := Exec("test/exec.ig")
+	jmk := NewJsonMarker("/tmp/exec.json")
+	ctx := NewCtx(nil)
+	ctx.Mark = jmk
+	err := ExecCtx("test/exec.ig", ctx)
 	if err != nil {
 		t.Error(err.Error())
+		return
 	}
-
+	os.Remove("/tmp/exec.json")
+	jmk.Store()
+	Exec("test/inc.ig")
 	ExecCtx("kkk", NewCtx(nil))
 }
 
 func TestRun(t *testing.T) {
+	Run([]string{"-h"})
 	Run([]string{"-l", "-m", "YOE", "test/sub.ig"})
+	Run([]string{"-l", "-m", "YOE", "-R", "JSON", "-r", "sub.json", "test/sub.ig"})
+	Run([]string{"-l", "-m", "YOE", "-R", "JSON", "-r", "/t/k/sub.json", "test/sub.ig"})
+	Run([]string{"-l", "-m", "YOE", "-R", "JSO", "-r", "sub.json", "test/sub.ig"})
+	Run([]string{"-l", "-m", "YOE", "test/sub.ig", "ab=1111"})
 	Run([]string{"-l", "-m", "EYOE", "test/sub.ig"})
 	Run([]string{"-l", "-m", "NONE", "test/sub.ig"})
 	Run([]string{"-l", "-m", "YOE"})

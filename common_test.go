@@ -8,17 +8,17 @@ import (
 )
 
 func TestMatch(t *testing.T) {
-	val := b_reg_cmt.ReplaceAll(
-		[]byte(`
+	// 	val := b_reg_cmt.ReplaceAll(
+	// 		[]byte(`
 
-/*
+	// /*
 
-*/
-kkdkfs
+	// */
+	// kkdkfs
 
-/* 
-kkk*/`), []byte(""))
-	fmt.Println(string(val))
+	// /*
+	// kkk*/`), []byte(""))
+	// 	fmt.Println(string(val))
 	fmt.Println(regexp.MatchString("^INC[\\ \\t]+", "INC abcc"))
 	fmt.Println(regexp.MatchString("^INC[\\ \\t]+", "INCabcc"))
 	fmt.Println(regexp.MustCompile("^INC[\\ \\t]+").ReplaceAllString("INC abcc", "ss"))

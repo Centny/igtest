@@ -30,7 +30,7 @@ N $(/js/b)			//assert value false
 
 //execute subprocess by cooke and ignore error
 //transfter value by key kk and aa
-SUB sub.ig kk=111111 aa=444444 -cookie -ig 
+SUB sub.ig kk=111111 aa=444444 -cookie -ig -CTX
 SUB sub.ig kk=111111 aa=444444
 
 BC $a*$b  	//execute math,equal @{$a+$b}
