@@ -261,7 +261,6 @@ func (l *Line) Exp(ctx *Ctx, left bool) (interface{}, error) {
 		return nil, Err("Invalid expression:%v", l.L)
 	}
 	exp := l.Args[0]
-	fmt.Println(exp, ",,,,")
 	if e_reg_c.MatchString(exp) {
 		nl, err := l.C.NewLine(strings.Trim(exp, " \t @[]"), l.Num, l.OnExeced)
 		if err != nil {
