@@ -158,7 +158,7 @@ func (c *Ctx) HR(args ...string) (int, string, error) {
 		}
 		turl = fmt.Sprintf("%v?%v", turl, vs.Encode())
 		c.log("GET(%v) header(%v)", turl, header)
-		code, data, err = c.H.HGet_H(header, turl)
+		code, data, err = c.H.HGet_H(header, "%v", turl)
 		c.log("GET response data:%v", data)
 	} else {
 		return 0, "", errors.New(fmt.Sprintf("unknow method(%v)", args[0]))
