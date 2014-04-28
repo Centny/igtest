@@ -40,8 +40,17 @@ func TestJme(t *testing.T) {
 	err := NewJME("/tmp/tt.json", "test/exec.ig").Exec()
 	if err != nil {
 		t.Error(err.Error())
+		return
 	}
 	NewJME("/tmp/tt.json", "test/ex.ig").Exec()
 	NewJME("/tmp/tt.json", "test/err.ig").Exec()
 	NewJME("/kk/k/tt.json", "test/exec.ig").Exec()
+	jme := NewJME("/tmp/tt.json", "test/exec.ig")
+	err = jme.E("SUB test/sub.ig")
+	if err != nil {
+		t.Error(err.Error())
+		return
+	}
+	jme.E("SUBB test/sub.ig")
+	jme.E("SUB test/subb.ig")
 }

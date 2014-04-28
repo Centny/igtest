@@ -125,8 +125,9 @@ func Run(args []string) int {
 type JsonMarkerExe struct {
 	*Ctx
 	*Compiler
-	Json string
-	Igs  string
+	Json   string
+	Igs    string
+	OnExec OnExecedFunc
 }
 
 func (j *JsonMarkerExe) Exec() error {
@@ -135,7 +136,7 @@ func (j *JsonMarkerExe) Exec() error {
 		return err
 	}
 	j.SET("CWD", j.Cwd)
-	err = j.CompileAndExec(j.Ctx, YesOnExeced)
+	err = j.CompileAndExec(j.Ctx, j.OnExec)
 	if err != nil {
 		return err
 	}
@@ -146,10 +147,20 @@ func (j *JsonMarkerExe) Exec() error {
 	return nil
 }
 
+func (j *JsonMarkerExe) E(line string) error {
+	l, err := j.NewLine(line, 0, j.OnExec)
+	if err != nil {
+		return err
+	}
+	_, err = l.Exec(j.Ctx, true)
+	return err
+}
+
 func NewJME(json, igs string) *JsonMarkerExe {
 	jme := &JsonMarkerExe{}
 	jme.Json = json
 	jme.Igs = igs
+	jme.OnExec = YesOnExeced
 	jme.Compiler = NewCompiler()
 	jme.Ctx = NewCtx(nil)
 	jme.Ctx.Mark = NewJsonMarker(jme.Json)
